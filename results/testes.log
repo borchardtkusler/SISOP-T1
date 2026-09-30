@@ -1,0 +1,17 @@
+ex1                      esperado=3   seq=3   par=3 3 3 3 3 3 3 3 | repeticoes divergentes: 0/20
+ex2                      esperado=4   seq=4   par=4 4 4 4 4 4 4 4 | repeticoes divergentes: 0/20
+ex3                      esperado=5   seq=5   par=5 5 5 5 5 5 5 5 | repeticoes divergentes: 0/20
+ex4                      esperado=6   seq=6   par=6 6 6 6 6 6 6 6 | repeticoes divergentes: 0/20
+ex5                      esperado=7   seq=7   par=7 7 7 7 7 7 7 7 | repeticoes divergentes: 0/20
+a1-vazia                 esperado=0   seq=0   par=0 0 0 0 0 0 0 0 | repeticoes divergentes: 0/20
+a10-aleatoria-40x40      esperado=23  seq=23  par=23 23 23 23 23 23 23 23 | repeticoes divergentes: 0/20
+a2-serpentina            esperado=1   seq=1   par=1 1 1 1 1 1 1 1 | repeticoes divergentes: 0/20
+a3-xadrez                esperado=1   seq=1   par=1 1 1 1 1 1 1 1 | repeticoes divergentes: 0/20
+a5-x-diagonal            esperado=1   seq=1   par=1 1 1 1 1 1 1 1 | repeticoes divergentes: 0/20
+a6-canto-antidiagonal    esperado=4   seq=4   par=4 4 4 4 4 4 4 4 | repeticoes divergentes: 0/20
+a7-linha-unica           esperado=7   seq=7   par=7 7 7 7 7 7 7 7 | repeticoes divergentes: 0/20
+a8-coluna-unica          esperado=7   seq=7   par=7 7 7 7 7 7 7 7 | repeticoes divergentes: 0/20
+a9-cheia                 esperado=1   seq=1   par=1 1 1 1 1 1 1 1 | repeticoes divergentes: 0/20
+
+Execucoes: 406 | Falhas: 0
+Detalhes em results/testes.csv

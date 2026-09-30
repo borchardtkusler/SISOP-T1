@@ -1,0 +1,55 @@
+Blocos (linhas [l0,l1) x colunas [c0,c1)):
+  bloco 0: [0,4) x [0,4)
+  bloco 1: [0,4) x [4,8)
+  bloco 2: [0,4) x [8,12)
+  bloco 3: [4,8) x [0,4)
+  bloco 4: [4,8) x [4,8)
+  bloco 5: [4,8) x [8,12)
+  bloco 6: [8,12) x [0,4)
+  bloco 7: [8,12) x [4,8)
+  bloco 8: [8,12) x [8,12)
+
+Fase 1 - rotulos locais (rotulo = indice da semente + 1):
+     1   .   .   .   .   6   6   6   9   .  11  11
+     .   1   .   .   .   6   .   .   9   .  11   .
+     .   .   1   .   .   .   .   .   .   .   .   .
+     .   .   .   1   .   .   .   .   .   .   .   .
+     .   .   .   .  53   .   .   .   .   .   .   .
+    61  61   .   .   .  53   .   .   .   .   .   .
+    61   .   .   .   .   .  53   .   .   .   .   .
+     .   .   .  88  89   .   .  53   .   .   .   .
+     .   .   . 100 101   .   .   . 105   .   .   .
+     .   .   .   .   .   .   .   .   . 105   .   .
+     . 122   .   .   .   .   .   .   .   . 105   .
+     . 122 122   .   .   . 139   .   .   .   . 105
+Objetos locais por bloco: 1 1 2 2 2 0 2 2 1  (soma = 13)
+
+Fase 2 - unioes nas fronteiras (a ordem varia entre execucoes):
+  [bloco 0] une rotulo 1 com rotulo 53
+  [bloco 1] une rotulo 6 com rotulo 9
+  [bloco 3] une rotulo 88 com rotulo 100
+  [bloco 3] une rotulo 88 com rotulo 101
+  [bloco 3] une rotulo 88 com rotulo 89
+  [bloco 4] une rotulo 53 com rotulo 105
+
+Fase 3 - rotulos globais apos a consolidacao:
+     1   .   .   .   .   6   6   6   6   .  11  11
+     .   1   .   .   .   6   .   .   6   .  11   .
+     .   .   1   .   .   .   .   .   .   .   .   .
+     .   .   .   1   .   .   .   .   .   .   .   .
+     .   .   .   .   1   .   .   .   .   .   .   .
+    61  61   .   .   .   1   .   .   .   .   .   .
+    61   .   .   .   .   .   1   .   .   .   .   .
+     .   .   .  88  88   .   .   1   .   .   .   .
+     .   .   .  88  88   .   .   .   1   .   .   .
+     .   .   .   .   .   .   .   .   .   1   .   .
+     . 122   .   .   .   .   .   .   .   .   1   .
+     . 122 122   .   .   . 139   .   .   .   .   1
+Objetos = 13 (locais) - 6 (unioes) = 7
+
+Versao: paralela (pthreads)
+Matriz: 12 x 12
+Threads: 3
+Blocos: 3 x 3
+Objetos: 7
+Tempo(ms): 0.256

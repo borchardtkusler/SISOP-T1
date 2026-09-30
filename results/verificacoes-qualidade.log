@@ -1,0 +1,18 @@
+# Verificacoes de qualidade - 2026-09-30
+## ThreadSanitizer (cc -fsanitize=thread): 5 obrigatorias + 800x800 com 8 threads e 16x16 blocos
+Avisos: 0
+## Valgrind memcheck - sequencial 300x300
+==11937== HEAP SUMMARY:
+==11937==     in use at exit: 0 bytes in 0 blocks
+==11937== All heap blocks were freed -- no leaks are possible
+==11937== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+## Valgrind memcheck - paralela 300x300, 4 threads, 4x4 blocos
+==11939== HEAP SUMMARY:
+==11939==     in use at exit: 0 bytes in 0 blocks
+==11939== All heap blocks were freed -- no leaks are possible
+==11939== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+## Valgrind helgrind - paralela 200x200, 4 threads
+==11949== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 45 from 8)
+## Compilacao com -Werror
+cc -std=c89 -Wall -Wextra -pedantic -O2 -Werror src/conta-objetos-sequencial.c src/comum.c -o conta-objetos-sequencial
+cc -std=c89 -Wall -Wextra -pedantic -O2 -Werror -pthread src/conta-objetos-paralelo.c src/comum.c -o conta-objetos-paralelo -pthread

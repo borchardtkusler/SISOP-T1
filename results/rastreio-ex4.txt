@@ -1,0 +1,48 @@
+Blocos (linhas [l0,l1) x colunas [c0,c1)):
+  bloco 0: [0,3) x [0,4)
+  bloco 1: [0,3) x [4,8)
+  bloco 2: [0,3) x [8,12)
+  bloco 3: [3,6) x [0,4)
+  bloco 4: [3,6) x [4,8)
+  bloco 5: [3,6) x [8,12)
+  bloco 6: [6,9) x [0,4)
+  bloco 7: [6,9) x [4,8)
+  bloco 8: [6,9) x [8,12)
+
+Fase 1 - rotulos locais (rotulo = indice da semente + 1):
+     .   2   2   .   .   .   .   .   .   .  11   .
+     .   .   2   2  17  17   .   .   .  11  11   .
+     .   .   .   .   .  17   .   .   .   .   .   .
+     .   .   .   .   .  42  42   .   .   .   .   .
+     .  50   .   .   .   .  42   .   .  58   .   .
+     .  50  50   .   .   .   .   .  58  58   .   .
+     .   .  75  75   .   .   .   .  81   .   .   .
+     .   .   .  75   .   .   .  92  81   .   .   .
+     .   .   .   .   . 102   .   .   .   .   . 108
+Objetos locais por bloco: 1 1 1 1 1 1 1 2 2  (soma = 11)
+
+Fase 2 - unioes nas fronteiras (a ordem varia entre execucoes):
+  [bloco 0] une rotulo 2 com rotulo 17
+  [bloco 1] une rotulo 17 com rotulo 42
+  [bloco 3] une rotulo 50 com rotulo 75
+  [bloco 5] une rotulo 58 com rotulo 81
+  [bloco 7] une rotulo 81 com rotulo 92
+
+Fase 3 - rotulos globais apos a consolidacao:
+     .   2   2   .   .   .   .   .   .   .  11   .
+     .   .   2   2   2   2   .   .   .  11  11   .
+     .   .   .   .   .   2   .   .   .   .   .   .
+     .   .   .   .   .   2   2   .   .   .   .   .
+     .  50   .   .   .   .   2   .   .  58   .   .
+     .  50  50   .   .   .   .   .  58  58   .   .
+     .   .  50  50   .   .   .   .  58   .   .   .
+     .   .   .  50   .   .   .  58  58   .   .   .
+     .   .   .   .   . 102   .   .   .   .   . 108
+Objetos = 11 (locais) - 5 (unioes) = 6
+
+Versao: paralela (pthreads)
+Matriz: 9 x 12
+Threads: 3
+Blocos: 3 x 3
+Objetos: 6
+Tempo(ms): 0.266

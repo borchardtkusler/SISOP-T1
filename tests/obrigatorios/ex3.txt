@@ -1,0 +1,10 @@
+# Exemplo 3 - Encontro de quatro blocos e diagonais | esperado: 5 | grade 2x2
+8 8
+1 1 0 0 0 0 0 0
+1 0 0 0 0 0 0 0
+0 0 0 0 0 0 1 0
+0 0 0 1 1 0 1 0
+0 0 0 1 1 0 0 0
+0 0 0 0 0 0 0 0
+0 0 1 0 0 0 0 1
+0 0 1 0 0 0 1 1

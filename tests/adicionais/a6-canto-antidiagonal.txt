@@ -1,0 +1,8 @@
+# A6 - par anti-diagonal no canto de 4 blocos | esperado: 4
+6 6
+1 0 0 0 0 1
+0 0 0 0 0 0
+0 0 0 1 0 0
+0 0 1 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 1
