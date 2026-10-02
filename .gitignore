@@ -2,3 +2,5 @@ conta-objetos-sequencial
 conta-objetos-paralelo
 *.o
 __pycache__/
+.DS_Store
+*.dSYM/

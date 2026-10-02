@@ -1,9 +1,10 @@
-data: 2026-09-30T20:44:01-03:00
-Linux 6.18.44-fc-v50 x86_64
-CPU(s):                                  2
-Model name:                              Intel(R) Xeon(R) Processor @ 2.10GHz
-Thread(s) per core:                      1
-Core(s) per socket:                      2
-               total        used        free      shared  buff/cache   available
-Mem:           7.8Gi       489Mi       7.2Gi        13Mi       438Mi       7.4Gi
-cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+data: 2026-10-02T17:34:51-0300
+Darwin 25.3.0 arm64
+Processador: Apple M2
+Nucleos fisicos: 8
+Processadores logicos: 8
+Nucleos de desempenho (P): 4
+Nucleos de eficiencia (E): 4
+Memoria RAM (GiB): 8
+Sistema: macOS 26.3
+Apple clang version 17.0.0 (clang-1700.3.19.1)

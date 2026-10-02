@@ -19,7 +19,7 @@ O relatório completo está em [`RELATORIO_TECNICO.md`](RELATORIO_TECNICO.md).
 
 ## Compilação
 
-Requer um compilador C (gcc ou clang) e um sistema POSIX (Linux ou macOS).
+Requer um compilador C (gcc ou clang) e um sistema POSIX. Testado em macOS 26.3 (Apple clang 17) e em Linux (gcc 13).
 
 ```bash
 make            # compila as duas versões (-std=c89 -Wall -Wextra -pedantic -O2)
@@ -86,7 +86,7 @@ Resultados obtidos (detalhes no relatório):
 | 4 | 9 × 12 | 6 | 6 | 6 |
 | 5 | 12 × 12 | 7 | 7 | 7 |
 
-Matriz 6000 × 6000 (densidade 0,45), mediana de 10 execuções em máquina de 2 núcleos: sequencial 1365 ms; paralela com 2 threads 746 ms (**aceleração 1,83**).
+Matriz 6000 × 6000 (densidade 0,45), mediana de 10 execuções em um Apple M2 (4 núcleos de desempenho + 4 de eficiência): sequencial 728 ms; paralela com 4 threads 220 ms (**aceleração 3,31**) e com 8 threads 150 ms (**aceleração 4,84**).
 
 ## Arquitetura
 

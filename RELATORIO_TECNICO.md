@@ -18,12 +18,12 @@
 | Modalidade | [Individual / dupla] |
 | Turma | [PREENCHER] |
 | Estratégia paralela | Pthreads |
-| Plataforma testada | Linux (x86_64) |
+| Plataforma testada | macOS 26.3 (arm64, Apple M2) e Linux (x86_64) |
 | Commit avaliado | [`PREENCHER HASH_DO_COMMIT`] |
 
 ## Resumo
 
-Este trabalho conta os objetos de uma matriz binária, definidos como componentes conexos de células `1` sob conectividade 8. A versão sequencial percorre a matriz e, a cada célula `1` ainda não visitada, executa um *flood fill* iterativo com pilha explícita, evitando recursão profunda. A versão paralela usa Pthreads: a matriz é dividida em uma grade de blocos, distribuídos às threads por uma fila dinâmica protegida por mutex. Na primeira fase, cada thread rotula os componentes locais do bloco com um rótulo globalmente único (índice linear da semente + 1), sem coordenação. Na segunda fase, as threads examinam as fronteiras inferior e direita de cada bloco, incluindo diagonais, e registram as equivalências em uma estrutura *union-find* compartilhada, protegida por um segundo mutex. O total é a soma dos objetos locais menos o número de uniões efetivas. As duas versões produziram os resultados esperados nas cinco matrizes obrigatórias, em nove casos adicionais, em oito configurações paralelas e em 500 matrizes aleatórias comparadas com um oráculo independente (scipy). Em uma matriz 6000 × 6000, com 2 threads em máquina de 2 núcleos, a aceleração foi 1,83 (eficiência 0,92).
+Este trabalho conta os objetos de uma matriz binária, definidos como componentes conexos de células `1` sob conectividade 8. A versão sequencial percorre a matriz e, a cada célula `1` ainda não visitada, executa um *flood fill* iterativo com pilha explícita, evitando recursão profunda. A versão paralela usa Pthreads: a matriz é dividida em uma grade de blocos, distribuídos às threads por uma fila dinâmica protegida por mutex. Na primeira fase, cada thread rotula os componentes locais do bloco com um rótulo globalmente único (índice linear da semente + 1), sem coordenação. Na segunda fase, as threads examinam as fronteiras inferior e direita de cada bloco, incluindo diagonais, e registram as equivalências em uma estrutura *union-find* compartilhada, protegida por um segundo mutex. O total é a soma dos objetos locais menos o número de uniões efetivas. As duas versões produziram os resultados esperados nas cinco matrizes obrigatórias, em nove casos adicionais, em oito configurações paralelas e em 500 matrizes aleatórias comparadas com um oráculo independente (scipy). Em uma matriz 6000 × 6000, em um Apple M2 de 8 núcleos, a aceleração foi 1,74 com 2 threads, 3,31 com 4 e 4,84 com 8.
 
 **Palavras-chave:** sistemas operacionais; paralelismo; processos; threads; conectividade 8; flood fill; componentes conexos.
 
@@ -113,20 +113,22 @@ O projeto contém duas implementações funcionalmente equivalentes:
 
 ### 3.1 Hardware e software
 
+Ambiente das medições de desempenho (registrado em [`results/ambiente.txt`](results/ambiente.txt)):
+
 | Item | Especificação |
 |---|---|
-| Processador | Intel Xeon @ 2.10 GHz (máquina virtual) |
-| Núcleos físicos | 2 |
-| Processadores lógicos | 2 (1 thread por núcleo) |
-| Memória RAM | 7,8 GiB |
-| Sistema operacional | Linux 6.18 (Ubuntu 24.04) |
-| Arquitetura | x86_64 |
-| Compilador | gcc 13.3.0 (`cc`) |
+| Processador | Apple M2 (MacBook Air) |
+| Núcleos físicos | 8: 4 de desempenho (P) + 4 de eficiência (E) |
+| Processadores lógicos | 8 |
+| Memória RAM | 8 GiB |
+| Sistema operacional | macOS 26.3 (Darwin 25.3.0) |
+| Arquitetura | arm64 |
+| Compilador | Apple clang 17.0.0 (`cc`) |
 | Padrão da linguagem | C89/C90 |
 | APIs POSIX utilizadas | `pthread_create`, `pthread_join`, `pthread_mutex_init/lock/unlock/destroy`, `clock_gettime(CLOCK_MONOTONIC)` |
 | Flags de compilação | `-std=c89 -Wall -Wextra -pedantic -O2 -pthread` |
 
-> O código evita `pthread_barrier_t`, que não existe no macOS, e usa apenas APIs disponíveis nos dois sistemas. [PREENCHER: se testar também no macOS, registre aqui.]
+O projeto também foi compilado e testado em Linux (Ubuntu 24.04, x86_64, gcc 13.3.0), onde foram executadas as verificações com Valgrind (seção 10.2). O código evita `pthread_barrier_t`, que não existe no macOS, e usa apenas APIs disponíveis nos dois sistemas.
 
 ### 3.2 Compilação
 
@@ -283,7 +285,7 @@ flowchart LR
 
 ### 6.3 Paralelismo efetivo
 
-O cálculo pesado, o flood fill de todas as células, é feito **simultaneamente** pelas threads na fase 1, cada uma em blocos diferentes. As threads não esperam umas pelas outras nessa fase: a única interação é retirar o próximo bloco da fila, o que custa alguns nanossegundos por bloco. A fase 2 também é paralela: a varredura das fronteiras só lê dados e é feita sem trava. Só a aplicação das uniões é serializada, e seu custo é proporcional ao perímetro dos blocos, não à área. A evidência de paralelismo real é a aceleração de 1,83 com 2 threads na matriz grande (seção 9).
+O cálculo pesado, o flood fill de todas as células, é feito **simultaneamente** pelas threads na fase 1, cada uma em blocos diferentes. As threads não esperam umas pelas outras nessa fase: a única interação é retirar o próximo bloco da fila, o que custa alguns nanossegundos por bloco. A fase 2 também é paralela: a varredura das fronteiras só lê dados e é feita sem trava. Só a aplicação das uniões é serializada, e seu custo é proporcional ao perímetro dos blocos, não à área. A evidência de paralelismo real é a aceleração de 3,31 com 4 threads e de 4,84 com 8 threads na matriz grande (seção 9).
 
 | Etapa | Sequencial ou paralela? | Unidade responsável | Motivo |
 |---|---|---|---|
@@ -448,7 +450,7 @@ A **ordem** das uniões varia entre execuções (depende de qual thread chega pr
 | Repetições por configuração | 10, **intercaladas** (em cada rodada todas as configurações rodam uma vez), para que o ruído momentâneo da máquina afete todas de forma parecida |
 | Medida representativa | Mediana |
 | Critério para dispersão | Intervalo interquartil (IQR = Q3 − Q1); mínimo e máximo em `resumo.csv` |
-| Carga do sistema durante os testes | Máquina virtual dedicada, sem outras cargas do usuário. A VM apresentou ruído de até ±15 %, o que justificou a mediana. |
+| Carga do sistema durante os testes | Notebook ligado à tomada, com os demais aplicativos fechados. A dispersão foi baixa (IQR abaixo de 2 % da mediana na maioria das configurações). |
 | Flags de otimização | `-O2` |
 
 As medições brutas estão disponíveis em [`results/medicoes.csv`](results/medicoes.csv), e o resumo em [`results/resumo.csv`](results/resumo.csv). Para reproduzir: `make desempenho && make graficos`.
@@ -473,33 +475,43 @@ $$
 
 | Versão | Trabalhadores (`p`) | Tempo representativo (ms) | Dispersão - IQR (ms) | Aceleração `S(p)` | Eficiência `E(p)` | Resultado correto? |
 |---|---:|---:|---:|---:|---:|---|
-| Sequencial | 1 | 1365,3 | 25,4 | 1,00 | 1,00 | Sim |
-| Paralela | 1 | 1457,5 | 108,0 | 0,94 | 0,94 | Sim |
-| Paralela | 2 | 745,8 | 49,7 | **1,83** | **0,92** | Sim |
-| Paralela | 4 | 727,7 | 18,6 | 1,88 | 0,47 | Sim |
-| Paralela | 8 | 718,7 | 19,9 | 1,90 | 0,24 | Sim |
+| Sequencial | 1 | 728,4 | 3,1 | 1,00 | 1,00 | Sim |
+| Paralela | 1 | 797,5 | 2,6 | 0,91 | 0,91 | Sim |
+| Paralela | 2 | 417,4 | 4,6 | 1,74 | 0,87 | Sim |
+| Paralela | 4 | 220,0 | 1,4 | **3,31** | **0,83** | Sim |
+| Paralela | 8 | 150,4 | 7,3 | **4,84** | 0,61 | Sim |
 
 **Matriz pequena (200 × 200):**
 
 | Versão | Trabalhadores (`p`) | Tempo representativo (ms) | Dispersão - IQR (ms) | Aceleração `S(p)` | Eficiência `E(p)` | Resultado correto? |
 |---|---:|---:|---:|---:|---:|---|
-| Sequencial | 1 | 1,611 | 0,279 | 1,00 | 1,00 | Sim |
-| Paralela | 1 | 1,826 | 0,240 | 0,88 | 0,88 | Sim |
-| Paralela | 2 | 1,136 | 0,143 | 1,42 | 0,71 | Sim |
-| Paralela | 4 | 1,239 | 0,082 | 1,30 | 0,33 | Sim |
-| Paralela | 8 | 1,538 | 0,154 | 1,05 | 0,13 | Sim |
+| Sequencial | 1 | 0,900 | 0,016 | 1,00 | 1,00 | Sim |
+| Paralela | 1 | 1,020 | 0,028 | 0,88 | 0,88 | Sim |
+| Paralela | 2 | 0,593 | 0,008 | 1,52 | 0,76 | Sim |
+| Paralela | 4 | 0,427 | 0,013 | 2,11 | 0,53 | Sim |
+| Paralela | 8 | 0,438 | 0,040 | 2,05 | 0,26 | Sim |
 
 ### 9.4 Dados brutos das repetições
 
-Matriz grande (ms). As repetições da matriz pequena estão em `medicoes.csv`.
+**Matriz grande (6000 × 6000), tempos em ms:**
 
 | Versão | p | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | Mediana |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Sequencial | 1 | 1369,2 | 1369,3 | 1445,0 | 1339,7 | 1378,3 | 1336,5 | 1355,6 | 1438,0 | 1349,0 | 1361,4 | 1365,3 |
-| Paralela | 1 | 1552,0 | 1431,4 | 1543,7 | 1470,9 | 1398,3 | 1489,0 | 1419,0 | 1657,1 | 1444,2 | 1392,5 | 1457,5 |
-| Paralela | 2 | 749,2 | 728,7 | 778,7 | 742,4 | 760,7 | 723,1 | 718,1 | 818,2 | 713,5 | 842,9 | 745,8 |
-| Paralela | 4 | 741,5 | 748,0 | 759,6 | 724,9 | 741,3 | 730,5 | 723,8 | 711,0 | 722,5 | 717,4 | 727,7 |
-| Paralela | 8 | 710,6 | 743,8 | 722,6 | 718,8 | 714,7 | 718,6 | 714,0 | 688,3 | 738,3 | 737,9 | 718,7 |
+| Sequencial | 1 | 724,1 | 728,5 | 727,1 | 725,1 | 725,6 | 728,4 | 730,8 | 728,7 | 729,2 | 730,8 | 728,4 |
+| Paralela | 1 | 790,5 | 797,8 | 804,2 | 797,5 | 797,4 | 805,9 | 794,6 | 792,5 | 797,5 | 797,8 | 797,5 |
+| Paralela | 2 | 417,8 | 412,6 | 422,6 | 417,1 | 421,4 | 415,3 | 415,4 | 438,9 | 417,4 | 417,4 | 417,4 |
+| Paralela | 4 | 221,2 | 219,6 | 220,6 | 224,3 | 229,0 | 220,2 | 219,6 | 218,5 | 219,8 | 219,8 | 220,0 |
+| Paralela | 8 | 153,6 | 173,2 | 151,8 | 154,0 | 145,1 | 147,5 | 161,7 | 144,8 | 149,0 | 146,2 | 150,4 |
+
+**Matriz pequena (200 × 200), tempos em ms:**
+
+| Versão | p | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | R9 | R10 | Mediana |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Sequencial | 1 | 0,854 | 0,896 | 0,892 | 0,899 | 0,907 | 0,901 | 0,888 | 0,909 | 0,909 | 0,915 | 0,900 |
+| Paralela | 1 | 0,984 | 1,024 | 1,011 | 1,036 | 1,042 | 1,103 | 1,011 | 1,016 | 1,016 | 1,045 | 1,020 |
+| Paralela | 2 | 0,591 | 0,575 | 0,583 | 0,600 | 0,593 | 0,594 | 0,639 | 0,584 | 0,593 | 0,592 | 0,593 |
+| Paralela | 4 | 0,426 | 0,411 | 0,432 | 0,413 | 0,457 | 0,440 | 0,471 | 0,427 | 0,425 | 0,428 | 0,427 |
+| Paralela | 8 | 0,381 | 0,418 | 0,416 | 0,470 | 0,412 | 0,423 | 0,458 | 0,453 | 0,453 | 0,493 | 0,438 |
 
 ### 9.5 Gráfico de tempo de execução
 
@@ -511,7 +523,7 @@ Matriz grande (ms). As repetições da matriz pequena estão em `medicoes.csv`.
 
 ![Aceleração por quantidade de trabalhadores](results/grafico-aceleracao.png)
 
-**Figura 2 -** Aceleração observada em função da quantidade de trabalhadores. A linha ideal corresponde a `S(p) = p`; a linha pontilhada marca os 2 núcleos da máquina. Fonte: elaborado pelo grupo.
+**Figura 2 -** Aceleração observada em função da quantidade de trabalhadores. A linha ideal corresponde a `S(p) = p`; a linha pontilhada marca os 8 núcleos da máquina (4 de desempenho e 4 de eficiência). Fonte: elaborado pelo grupo.
 
 ### 9.7 Gráfico de eficiência
 
@@ -521,9 +533,9 @@ Matriz grande (ms). As repetições da matriz pequena estão em `medicoes.csv`.
 
 ### 9.8 Análise dos resultados
 
-**Ganho em relação à versão sequencial.** Na matriz grande, 2 threads reduziram o tempo de 1365 ms para 746 ms (S = 1,83; E = 0,92), perto do ideal para a máquina de 2 núcleos. Isso confirma que a fase 1, que domina o custo, é executada de fato em paralelo.
+**Ganho em relação à versão sequencial.** Na matriz grande, o tempo caiu de 728 ms (sequencial) para 417 ms com 2 threads, 220 ms com 4 e 150 ms com 8. As acelerações foram 1,74, 3,31 e 4,84. O tempo diminui a cada aumento de threads, o que confirma que a fase 1, que domina o custo, é executada de fato em paralelo.
 
-**Por que a versão paralela com 1 thread é 7 % mais lenta que a sequencial (S = 0,94).** Ela faz mais trabalho que a sequencial:
+**Por que a versão paralela com 1 thread é 9 % mais lenta que a sequencial (S = 0,91).** Ela faz mais trabalho que a sequencial:
 
 - usa `int rotulo[]` (4 bytes/célula, 144 MB) em vez de `unsigned char visitado[]` (1 byte/célula, 36 MB), o que quadruplica o tráfego de memória;
 - aloca `pai[]` (mais 144 MB), cujas páginas causam *page faults* na primeira escrita;
@@ -532,15 +544,15 @@ Matriz grande (ms). As repetições da matriz pequena estão em `medicoes.csv`.
 
 Essa sobrecarga é o custo de tornar o problema decomponível. A comparação com a versão sequencial otimizada é a mais honesta, e é a usada no cálculo de `S(p)`.
 
-**Por que S(2) = 1,83 e não 2.** Além da sobrecarga acima, a alocação e o preenchimento de 288 MB geram *page faults* tratados pelo kernel, que serializa parte desse trabalho. Os dois núcleos também disputam a mesma largura de banda de memória, e a fase 2 contém uma região crítica serializada. O IQR da configuração com 1 thread (108 ms) mostra que a própria VM varia bastante.
+**Escalabilidade até 4 threads.** A eficiência cai pouco: 0,91 com 1 thread, 0,87 com 2 e 0,83 com 4. Quase toda a distância para o ideal já está presente com 1 thread, ou seja, vem da sobrecarga fixa do algoritmo paralelo, e não de contenção entre threads. Comparando a versão paralela consigo mesma, de 1 para 4 threads o tempo cai 3,62 vezes (797,5 / 220,0), perto de 4. Isso é coerente com o projeto: a fase 1 não usa nenhuma trava nos dados, e a única região crítica frequente é a retirada de um bloco da fila. O que impede o ganho ideal é a parte que não se divide: os *page faults* da alocação de 288 MB, tratados pelo kernel, a disputa dos núcleos pela mesma largura de banda de memória e a região crítica do union-find.
 
-**Efeito da quantidade de threads (4 e 8).** A máquina tem **apenas 2 núcleos**. Com 4 ou 8 threads não há mais hardware para executá-las ao mesmo tempo: o SO as intercala nos mesmos 2 núcleos. Por isso a aceleração estabiliza em ≈ 1,9 e a eficiência cai para 0,47 e 0,24. Isso não é defeito do algoritmo: a eficiência é calculada sobre `p` threads, mas só havia 2 unidades físicas. O tempo não piorou, e chegou até a melhorar levemente (746 → 719 ms), por dois motivos: criar threads é barato, e mais threads significam mais blocos (padrão `2p × 2`), o que melhora o balanceamento dinâmico. [PREENCHER se possível: repetir `make desempenho` em uma máquina com 4+ núcleos para mostrar a escalabilidade além de 2 threads.]
+**Por que S(8) = 4,84 e não 8.** O Apple M2 tem núcleos heterogêneos: 4 de desempenho (P) e 4 de eficiência (E), estes mais lentos. Com 4 threads, o sistema operacional pode manter todas nos núcleos P. Com 8, metade das threads roda em núcleos E, de modo que a capacidade total de cálculo fica bem abaixo de "8 núcleos P". A eficiência de 0,61 reflete essa limitação do hardware, e não uma falha do algoritmo. Ainda assim os núcleos E contribuem: o tempo caiu de 220 ms para 150 ms. Aqui a **fila dinâmica** é importante. Com uma divisão estática (um bloco fixo por thread), o tempo total seria ditado pelas threads nos núcleos lentos. Com a fila e 32 blocos (grade padrão `2p × 2`), os núcleos rápidos simplesmente retiram mais blocos, e o trabalho se ajusta à velocidade de cada núcleo. A configuração com 8 threads também teve a maior dispersão (IQR de 7,3 ms), compatível com a variação de quais threads o sistema coloca em cada tipo de núcleo.
 
-**Matriz pequena.** Com 200 × 200 (40 mil células), a contagem inteira leva ~1,6 ms. Mesmo assim, 2 threads ainda ganham (S = 1,42), mas com 8 threads o ganho quase desaparece (S = 1,05). Cada execução com 8 threads cria e espera 16 threads (2 fases × 8), cada uma custando dezenas de microssegundos, e esse custo fixo passa a competir com um cálculo muito curto. Como alerta o enunciado, matrizes pequenas servem para validar correção, não para medir ganho.
+**Matriz pequena.** Com 200 × 200 (40 mil células), a contagem sequencial leva 0,9 ms. A versão paralela ainda ganha com 2 threads (S = 1,52) e com 4 (S = 2,11), mas com 8 não há ganho adicional (S = 2,05; 0,438 ms contra 0,427 ms). Cada execução com 8 threads cria e espera 16 threads (2 fases × 8), e esse custo fixo passa a competir com um cálculo de menos de meio milissegundo. A eficiência cai para 0,26. Como alerta o enunciado, matrizes pequenas servem para validar correção, não para medir ganho.
 
-**Custo da consolidação.** A fase 2 trabalha só sobre as fronteiras: com uma grade `BL × BC`, examina cerca de `(BL−1)·C + (BC−1)·L` células, frente às `L·C` da fase 1. Para 6000 × 6000 com 2 threads (grade 4 × 2), são ~24 mil células de fronteira contra 36 milhões no total (< 0,1 %). Travar o mutex uma vez por bloco, e não por par, mantém a contenção desprezível.
+**Custo da consolidação.** A fase 2 trabalha só sobre as fronteiras: com uma grade `BL × BC`, examina cerca de `(BL−1)·C + (BC−1)·L` células, frente às `L·C` da fase 1. Para 6000 × 6000 com 8 threads (grade 16 × 2), são cerca de 96 mil células de fronteira contra 36 milhões no total (menos de 0,3 %). Travar o mutex uma vez por bloco, e não por par, mantém a contenção desprezível.
 
-**Trechos que permanecem sequenciais.** Geração/leitura da matriz (fora da medição), montagem da grade (O(blocos)), a região crítica do union-find e a fase 3 (O(blocos)).
+**Trechos que permanecem sequenciais.** Geração/leitura da matriz (fora da medição), alocação das estruturas, montagem da grade (O(blocos)), a região crítica do union-find e a fase 3 (O(blocos)).
 
 ## 10. Tratamento de erros e qualidade do código
 
@@ -563,12 +575,12 @@ Observação: as funções `pthread_*` não usam `errno`; retornam o código de 
 
 | Verificação | Comando/ferramenta | Resultado |
 |---|---|---|
-| Compilação C89/C90 | `make OPT="-O2 -Werror"` | Sem erros |
+| Compilação C89/C90 | `make` (clang no macOS, gcc no Linux); `make OPT="-O2 -Werror"` no Linux | Sem erros |
 | Avisos do compilador | `-Wall -Wextra -pedantic` | Nenhum aviso |
-| Vazamentos de memória | Valgrind memcheck (`--leak-check=full`), ambas as versões | "All heap blocks were freed -- no leaks are possible"; 0 erros |
-| Condições de corrida | ThreadSanitizer (`-fsanitize=thread`): 5 obrigatórias + 800 × 800 com 8 threads e 16 × 16 blocos. Valgrind Helgrind: 200 × 200, 4 threads | 0 avisos (TSan); 0 erros (Helgrind) |
+| Vazamentos de memória | Valgrind memcheck (`--leak-check=full`), ambas as versões, em Linux (o Valgrind não está disponível para macOS em arm64) | "All heap blocks were freed -- no leaks are possible"; 0 erros |
+| Condições de corrida | ThreadSanitizer (`-fsanitize=thread`), em macOS (clang) e Linux (gcc): 800 × 800 com 8 threads e 16 × 16 blocos; no Linux também as 5 obrigatórias. Valgrind Helgrind (Linux): 200 × 200, 4 threads | 0 avisos (TSan); 0 erros (Helgrind) |
 
-Detalhes em [`results/verificacoes-qualidade.log`](results/verificacoes-qualidade.log).
+Detalhes das verificações feitas em Linux em [`results/verificacoes-qualidade.log`](results/verificacoes-qualidade.log).
 
 Durante o desenvolvimento, o AddressSanitizer revelou um erro: vizinhos de fundo (rótulo 0) eram registrados como equivalências, e o union-find acessava `pai[0]`, nunca inicializado. A correção foi ignorar pares com rótulo 0 em `registrar_par`.
 
@@ -590,15 +602,15 @@ Durante o desenvolvimento, o AddressSanitizer revelou um erro: vizinhos de fundo
 | Union-find com um mutex global | Uniões serializadas | Mutex por raiz ou operações atômicas (*compare-and-swap*) | O custo da fase 2 é proporcional ao perímetro dos blocos (< 0,1 % das células); operações atômicas não fazem parte do C89. |
 | `pthread_join` como barreira (threads recriadas por fase) | ~dezenas de µs a mais por fase | `pthread_barrier_t`, ou barreira com mutex + variável de condição | `pthread_barrier_t` não existe no macOS. O `join` é simples, portável e seu custo é desprezível na matriz grande. |
 | Grade padrão `2p × 2` | Mais blocos que threads, com mais fronteiras | 1 bloco por thread (faixas) | Balanceamento dinâmico sem aumentar muito o perímetro. Configurável com `-b`. |
-| Medições em máquina de 2 núcleos | Não mostra escalabilidade além de 2 | — | Único ambiente disponível no momento das medições. [PREENCHER se medir em outra máquina.] |
+| Medições em processador com núcleos heterogêneos (4 P + 4 E) | A aceleração com 8 threads não pode ser comparada diretamente com o ideal `S(p) = p` | Medir em máquina com 8 núcleos iguais | Hardware disponível ao grupo; a análise (seção 9.8) considera essa característica. |
 
 ## 12. Conclusão
 
 Os objetivos foram alcançados. As versões sequencial e paralela contam corretamente objetos com conectividade 8, produzindo os valores esperados nas cinco matrizes obrigatórias, em nove casos adicionais, em oito configurações de threads e blocos, em 280 repetições de determinismo e em 500 matrizes aleatórias comparadas com uma implementação independente. ThreadSanitizer, Helgrind e Valgrind não apontaram condições de corrida nem erros de memória.
 
-No desempenho, a versão paralela obteve aceleração de 1,83 com 2 threads na matriz 6000 × 6000 (eficiência 0,92), próximo do ideal para os 2 núcleos disponíveis. Com mais threads que núcleos, a aceleração estabiliza em ≈ 1,9, como esperado. Na matriz 200 × 200, o custo fixo de criar threads quase anula o ganho com 8 threads, o que ilustra por que matrizes pequenas não servem para avaliar desempenho.
+No desempenho, na matriz 6000 × 6000 em um Apple M2, a versão paralela obteve aceleração de 1,74 com 2 threads, 3,31 com 4 (eficiência 0,83) e 4,84 com 8. A queda de eficiência com 8 threads se explica pelos núcleos de eficiência do processador, mais lentos que os de desempenho. Na matriz 200 × 200, passar de 4 para 8 threads não trouxe ganho, porque o custo fixo de criar threads compete com um cálculo de menos de um milissegundo, o que ilustra por que matrizes pequenas não servem para avaliar desempenho.
 
-O principal aprendizado é que paralelizar exige tornar o problema decomponível. O flood fill paralelo em si é simples; o essencial está em (1) escolher rótulos que não colidem sem comunicação, (2) restringir as escritas de cada thread à sua região, para dispensar travas no caminho mais custoso, e (3) concentrar a sincronização em uma etapa pequena, a consolidação das fronteiras. Uma melhoria futura realista seria compactar os rótulos após a fase 1, reduzindo o vetor `pai[]` ao número de componentes locais, e medir o programa em uma máquina com mais núcleos.
+O principal aprendizado é que paralelizar exige tornar o problema decomponível. O flood fill paralelo em si é simples; o essencial está em (1) escolher rótulos que não colidem sem comunicação, (2) restringir as escritas de cada thread à sua região, para dispensar travas no caminho mais custoso, e (3) concentrar a sincronização em uma etapa pequena, a consolidação das fronteiras. Uma melhoria futura realista seria compactar os rótulos após a fase 1, reduzindo o vetor `pai[]` ao número de componentes locais, o que diminuiria a memória e a sobrecarga observada com 1 thread.
 
 ## 13. Vídeo de apresentação
 
@@ -696,8 +708,8 @@ O código C não usa bibliotecas externas além da biblioteca padrão e de Pthre
 ## Apêndice A - Registro de comandos
 
 ```bash
-# Informações do ambiente
-uname -srm; lscpu; free -h; cc --version     # salvo em results/ambiente.txt
+# Informações do ambiente (gravadas em results/ambiente.txt por mede-desempenho.sh)
+uname -srm; sysctl -n machdep.cpu.brand_string hw.physicalcpu hw.logicalcpu; sw_vers; cc --version
 
 # Compilação
 make clean && make
@@ -710,6 +722,8 @@ python3 tests/validacao-aleatoria.py 500      # -> results/validacao-aleatoria.l
 
 # Verificações de qualidade
 cc -std=c89 -g -O1 -fsanitize=thread -pthread src/conta-objetos-paralelo.c src/comum.c -o par-tsan
+./par-tsan -t 8 -b 16 16 -g 800 800 0.45 11
+# As duas verificacoes abaixo foram feitas em Linux:
 valgrind --leak-check=full ./conta-objetos-paralelo -t 4 -b 4 4 -g 300 300 0.45 5
 valgrind --tool=helgrind ./conta-objetos-paralelo -t 4 -b 4 4 -g 200 200 0.45 5
 
@@ -724,9 +738,11 @@ make graficos                                 # -> results/resumo.csv, results/*
 
 ```csv
 matriz,linhas,colunas,versao,trabalhadores,repeticao,tempo_ms,objetos,resultado_correto
-grande,6000,6000,sequencial,1,1,1369.209,263877,true
-grande,6000,6000,paralela,1,1,1552.033,263877,true
-grande,6000,6000,paralela,2,1,749.151,263877,true
+grande,6000,6000,sequencial,1,1,724.088,263877,true
+grande,6000,6000,paralela,1,1,790.452,263877,true
+grande,6000,6000,paralela,2,1,417.753,263877,true
+grande,6000,6000,paralela,4,1,221.180,263877,true
+grande,6000,6000,paralela,8,1,153.612,263877,true
 ```
 
 ## Apêndice C - Correspondência com os critérios de avaliação

@@ -24,13 +24,24 @@ MATRIZES=("grande 6000 6000 0.45 42" "pequena 200 200 0.45 42")
 
 campo() { awk -v k="$1" '$1==k":"{print $2}'; }
 
-# Registro do ambiente
+# Registro do ambiente (Linux ou macOS)
 {
-    echo "data: $(date -Iseconds)"
+    echo "data: $(date '+%Y-%m-%dT%H:%M:%S%z')"
     uname -srm
-    (lscpu 2>/dev/null | grep -E 'Model name|^CPU\(s\)|Core\(s\) per socket|Thread\(s\) per core') \
-        || sysctl -n machdep.cpu.brand_string hw.ncpu 2>/dev/null
-    (free -h 2>/dev/null | head -2) || sysctl -n hw.memsize 2>/dev/null
+    if [ "$(uname -s)" = "Darwin" ]; then
+        echo "Processador: $(sysctl -n machdep.cpu.brand_string)"
+        echo "Nucleos fisicos: $(sysctl -n hw.physicalcpu)"
+        echo "Processadores logicos: $(sysctl -n hw.logicalcpu)"
+        # Apple Silicon: nucleos de desempenho (P) e de eficiencia (E)
+        echo "Nucleos de desempenho (P): $(sysctl -n hw.perflevel0.physicalcpu 2>/dev/null || echo n/d)"
+        echo "Nucleos de eficiencia (E): $(sysctl -n hw.perflevel1.physicalcpu 2>/dev/null || echo n/d)"
+        echo "Memoria RAM (GiB): $(( $(sysctl -n hw.memsize) / 1073741824 ))"
+        echo "Sistema: $(sw_vers -productName) $(sw_vers -productVersion)"
+    else
+        lscpu | grep -E 'Model name|^CPU\(s\)|Core\(s\) per socket|Thread\(s\) per core' || true
+        free -h | head -2 || true
+        grep PRETTY_NAME /etc/os-release || true
+    fi
     cc --version | head -1
 } > results/ambiente.txt
 
