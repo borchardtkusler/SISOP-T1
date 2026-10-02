@@ -15,7 +15,7 @@ O relatório completo está em [`RELATORIO_TECNICO.md`](RELATORIO_TECNICO.md).
 
 | Nome | Matrícula |
 |---|---|
-| [PREENCHER] | [PREENCHER] |
+| Betina Borchardt Kusler | 23200006-7 |
 
 ## Compilação
 
@@ -132,6 +132,6 @@ flowchart TD
 - **scipy** (`scipy.ndimage.label`) — usado somente nos testes, como oráculo independente de contagem.
 - **matplotlib** — geração dos gráficos.
 - **Valgrind** (memcheck, helgrind) e **ThreadSanitizer** — verificação de memória e de condições de corrida.
-- **Claude (Anthropic)**, assistente de IA — [PREENCHER: descrever o uso, conforme exigido no item 13 do enunciado].
+- **Claude (Anthropic)**, assistente de IA — Usado para gerar o código, os scripts de teste e medição e a redação inicial da documentação. A compilação, testes e medições foram executados e conferidos pela autora.
 
 Nenhuma biblioteca externa é usada no código C além da biblioteca padrão e de Pthreads.

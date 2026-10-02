@@ -3,20 +3,20 @@
 > **Disciplina:** Sistemas Operacionais - 2026/II  
 > **Professor:** Prof. Filipo Novo Mór  
 > **Instituição:** Pontifícia Universidade Católica do Rio Grande do Sul - Escola Politécnica  
-> **Repositório:** [PREENCHER URL pública do repositório](https://github.com/USUARIO/REPOSITORIO)  
+> **Repositório:** [https://github.com/borchardtkusler/SISOP-T1](https://github.com/borchardtkusler/SISOP-T1)  
 > **Versão do relatório:** 1.0  
-> **Data:** [PREENCHER DD/MM/AAAA]
+> **Data:** 02/10/2026
 
 ## Identificação
 
 | Campo | Informação |
 |---|---|
-| Integrante 1 | [PREENCHER nome completo] |
-| Matrícula do integrante 1 | [PREENCHER] |
-| Integrante 2 | [PREENCHER nome completo ou `Não se aplica`] |
-| Matrícula do integrante 2 | [PREENCHER ou `Não se aplica`] |
-| Modalidade | [Individual / dupla] |
-| Turma | [PREENCHER] |
+| Integrante 1 | Betina Borchardt Kusler |
+| Matrícula do integrante 1 | 23200006-7 |
+| Integrante 2 | Não se aplica |
+| Matrícula do integrante 2 | Não se aplica |
+| Modalidade | Individual |
+| Turma | 330 |
 | Estratégia paralela | Pthreads |
 | Plataforma testada | macOS 26.3 (arm64, Apple M2) e Linux (x86_64) |
 | Commit avaliado | [`PREENCHER HASH_DO_COMMIT`] |
@@ -100,7 +100,7 @@ O projeto contém duas implementações funcionalmente equivalentes:
 | `src/conta-objetos-sequencial.c` | Implementação sequencial de referência. |
 | `src/conta-objetos-paralelo.c` | Implementação paralela com Pthreads. |
 | `tests/obrigatorios/` | Cinco matrizes obrigatórias do enunciado (com o valor esperado no cabeçalho). |
-| `tests/adicionais/` | Casos adicionais criados pelo grupo. |
+| `tests/adicionais/` | Casos adicionais criados pela autora. |
 | `tests/executa-testes.sh` | Executa todas as matrizes nas duas versões e em 8 configurações paralelas. |
 | `tests/validacao-aleatoria.py` | Validação cruzada com o oráculo `scipy.ndimage.label`. |
 | `results/medicoes.csv` | Dados brutos das medições de desempenho. |
@@ -450,7 +450,7 @@ A **ordem** das uniões varia entre execuções (depende de qual thread chega pr
 | Repetições por configuração | 10, **intercaladas** (em cada rodada todas as configurações rodam uma vez), para que o ruído momentâneo da máquina afete todas de forma parecida |
 | Medida representativa | Mediana |
 | Critério para dispersão | Intervalo interquartil (IQR = Q3 − Q1); mínimo e máximo em `resumo.csv` |
-| Carga do sistema durante os testes | Notebook ligado à tomada, com os demais aplicativos fechados. A dispersão foi baixa (IQR abaixo de 2 % da mediana na maioria das configurações). |
+| Carga do sistema durante os testes | Notebook com os demais aplicativos fechados. A dispersão foi baixa: na matriz grande, o IQR ficou abaixo de 5 % da mediana em todas as configurações). |
 | Flags de otimização | `-O2` |
 
 As medições brutas estão disponíveis em [`results/medicoes.csv`](results/medicoes.csv), e o resumo em [`results/resumo.csv`](results/resumo.csv). Para reproduzir: `make desempenho && make graficos`.
@@ -517,19 +517,19 @@ $$
 
 ![Tempo de execução por quantidade de trabalhadores](results/grafico-tempo.png)
 
-**Figura 1 -** Tempo de execução da versão sequencial e das configurações paralelas. Barras de erro representam o intervalo interquartil (Q1 a Q3). Os painéis têm escalas diferentes porque os tempos diferem em três ordens de grandeza. Fonte: elaborado pelo grupo.
+**Figura 1 -** Tempo de execução da versão sequencial e das configurações paralelas. Barras de erro representam o intervalo interquartil (Q1 a Q3). Os painéis têm escalas diferentes porque os tempos diferem em três ordens de grandeza. Fonte: elaborado pela autora.
 
 ### 9.6 Gráfico de aceleração
 
 ![Aceleração por quantidade de trabalhadores](results/grafico-aceleracao.png)
 
-**Figura 2 -** Aceleração observada em função da quantidade de trabalhadores. A linha ideal corresponde a `S(p) = p`; a linha pontilhada marca os 8 núcleos da máquina (4 de desempenho e 4 de eficiência). Fonte: elaborado pelo grupo.
+**Figura 2 -** Aceleração observada em função da quantidade de trabalhadores. A linha ideal corresponde a `S(p) = p`; a linha pontilhada marca os 8 núcleos da máquina (4 de desempenho e 4 de eficiência). Fonte: elaborado pela autora.
 
 ### 9.7 Gráfico de eficiência
 
 ![Eficiência por quantidade de trabalhadores](results/grafico-eficiencia.png)
 
-**Figura 3 -** Eficiência paralela em função da quantidade de trabalhadores. Fonte: elaborado pelo grupo.
+**Figura 3 -** Eficiência paralela em função da quantidade de trabalhadores. Fonte: elaborado pela autora.
 
 ### 9.8 Análise dos resultados
 
@@ -599,10 +599,10 @@ Durante o desenvolvimento, o AddressSanitizer revelou um erro: vizinhos de fundo
 |---|---|---|---|
 | Threads em vez de processos | Menor isolamento: um erro derruba o programa todo | Processos com `fork` + memória compartilhada (`mmap`) + semáforos POSIX | Rótulos e union-find precisam ser compartilhados; com threads isso é natural e mais barato. |
 | Rótulo = índice linear + 1 (tipo `int`) | Limita a matriz a ~2,1 bilhões de células; `pai[]` tem o tamanho da matriz (4 bytes/célula) | Contador de rótulos por bloco com prefixo somado após a fase 1 (economiza memória) | Rótulos únicos sem nenhuma coordenação e sem etapa extra. Memória suficiente para os casos do trabalho. |
-| Union-find com um mutex global | Uniões serializadas | Mutex por raiz ou operações atômicas (*compare-and-swap*) | O custo da fase 2 é proporcional ao perímetro dos blocos (< 0,1 % das células); operações atômicas não fazem parte do C89. |
+| Union-find com um mutex global | Uniões serializadas | Mutex por raiz ou operações atômicas (*compare-and-swap*) | O custo da fase 2 é proporcional ao perímetro dos blocos (menos de 0,3 % das células); operações atômicas não fazem parte do C89. |
 | `pthread_join` como barreira (threads recriadas por fase) | ~dezenas de µs a mais por fase | `pthread_barrier_t`, ou barreira com mutex + variável de condição | `pthread_barrier_t` não existe no macOS. O `join` é simples, portável e seu custo é desprezível na matriz grande. |
 | Grade padrão `2p × 2` | Mais blocos que threads, com mais fronteiras | 1 bloco por thread (faixas) | Balanceamento dinâmico sem aumentar muito o perímetro. Configurável com `-b`. |
-| Medições em processador com núcleos heterogêneos (4 P + 4 E) | A aceleração com 8 threads não pode ser comparada diretamente com o ideal `S(p) = p` | Medir em máquina com 8 núcleos iguais | Hardware disponível ao grupo; a análise (seção 9.8) considera essa característica. |
+| Medições em processador com núcleos heterogêneos (4 P + 4 E) | A aceleração com 8 threads não pode ser comparada diretamente com o ideal `S(p) = p` | Medir em máquina com 8 núcleos iguais | Hardware disponível; a análise (seção 9.8) considera essa característica. |
 
 ## 12. Conclusão
 
@@ -635,20 +635,14 @@ O principal aprendizado é que paralelizar exige tornar o problema decomponível
 - [ ] Testes obrigatórios e adicionais (`make testes`).
 - [ ] Resultados de desempenho.
 - [ ] Conclusões.
-- [ ] Participação de ambos os integrantes, quando o trabalho for em dupla.
 
 ## 14. Contribuições dos integrantes
 
-| Atividade | Integrante 1 | Integrante 2 | Evidência/observação |
-|---|---|---|---|
-| Projeto da solução sequencial | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Projeto da solução paralela | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Sincronização/comunicação | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Consolidação | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Testes e medições | [PREENCHER] | [PREENCHER] | [PREENCHER] |
-| Documentação e apresentação | [PREENCHER] | [PREENCHER] | [PREENCHER] |
+| Atividade | Integrante 1 | Evidência/observação |
+|---|---|---|
+| Todas as atividades (solução sequencial e paralela, sincronização, consolidação, testes, medições, documentação e apresentação) | 100% | Trabalho individual. O código, os scripts e a redação inicial do relatório foram gerados com apoio de ferramenta de IA, identificada na seção 15. Compilação, execução dos testes, verificação com o ThreadSanitizer, medições de desempenho em máquina própria (Apple M2), revisão do material e publicação foram realizadas pela autora. Histórico em https://github.com/borchardtkusler/SISOP-T1/commits/main |
 
-Todos os integrantes declaram compreender integralmente o código, as estruturas de dados, a divisão do trabalho, a sincronização, a comunicação, a consolidação e os resultados apresentados.
+Declaro compreender integralmente o código, as estruturas de dados, a divisão do trabalho, a sincronização, a comunicação, a consolidação e os resultados apresentados.
 
 ## 15. Ferramentas, bibliotecas, referências e códigos externos
 
@@ -659,10 +653,10 @@ Todos os integrantes declaram compreender integralmente o código, as estruturas
 | NumPy | Manipulação das matrizes nos testes | https://numpy.org | BSD-3-Clause | `tests/validacao-aleatoria.py` |
 | Matplotlib | Gráficos de desempenho | https://matplotlib.org | Licença Matplotlib (PSF-like) | `results/gera-graficos.py` |
 | Valgrind (memcheck, helgrind) | Vazamentos e erros de sincronização | https://valgrind.org | GPL-2.0 | Verificação (seção 10.2) |
-| ThreadSanitizer / AddressSanitizer (gcc) | Detecção de condições de corrida e de erros de memória | gcc | GPL-3.0 | Verificação (seção 10.2) |
+| ThreadSanitizer / AddressSanitizer | Detecção de condições de corrida e de erros de memória | gcc (Linux) e Apple clang (macOS) | GPL-3.0 (gcc); Apache-2.0 com exceção LLVM (clang) | Verificação (seção 10.2) |
 | Union-find (conjuntos disjuntos) | Algoritmo clássico de consolidação | Cormen et al., *Algoritmos: Teoria e Prática*, cap. "Estruturas de dados para conjuntos disjuntos" | — | `uf_encontrar`, `uf_unir` |
 | Slides da disciplina | Processos, threads, mutex | Prof. Filipo Novo Mór | — | Projeto geral |
-| Claude (Anthropic), assistente de IA | [PREENCHER: descrever como foi usado e como os resultados foram verificados e compreendidos pelo grupo] | https://claude.ai | — | [PREENCHER] |
+| Claude (Anthropic), assistente de IA | Geração do código C das versões sequencial e paralela, dos scripts de teste e de medição e da redação inicial deste relatório. A autora compilou, executou os testes, verificou condições de corrida com o ThreadSanitizer e realizou as medições de desempenho em máquina própria, revisando o código e os resultados. | https://claude.ai | — | `src/`, `tests/`, `results/*.sh`, `results/*.py`, `README.md`, `RELATORIO_TECNICO.md` |
 
 O código C não usa bibliotecas externas além da biblioteca padrão e de Pthreads.
 
@@ -695,14 +689,14 @@ O código C não usa bibliotecas externas além da biblioteca padrão e de Pthre
 
 ### Repositório e apresentação
 
-- [ ] O repositório do GitHub está público.
+- [x] O repositório do GitHub está público.
 - [x] `README.md` contém descrição, autoria, compilação, execução e arquitetura.
 - [x] O `Makefile` ou as instruções equivalentes permitem compilação reproduzível.
 - [x] As matrizes de teste e seus resultados estão incluídos.
 - [x] A análise de desempenho está incluída.
 - [ ] Os slides estão em `slides/apresentacao.pdf`.
 - [ ] O link do vídeo está acessível e o vídeo tem até 10 minutos.
-- [ ] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
+- [x] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
 - [ ] O hash do commit avaliado foi registrado neste relatório.
 
 ## Apêndice A - Registro de comandos
