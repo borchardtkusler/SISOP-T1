@@ -694,7 +694,7 @@ O código C não usa bibliotecas externas além da biblioteca padrão e de Pthre
 - [x] O `Makefile` ou as instruções equivalentes permitem compilação reproduzível.
 - [x] As matrizes de teste e seus resultados estão incluídos.
 - [x] A análise de desempenho está incluída.
-- [ ] Os slides estão em `slides/apresentacao.pdf`.
+- [x] Os slides estão em `slides/apresentacao.pdf`.
 - [ ] O link do vídeo está acessível e o vídeo tem até 10 minutos.
 - [x] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
 - [ ] O hash do commit avaliado foi registrado neste relatório.

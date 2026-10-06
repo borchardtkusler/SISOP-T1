@@ -124,7 +124,7 @@ flowchart TD
 │   ├── mede-desempenho.sh
 │   └── gera-graficos.py
 └── slides/
-    └── apresentacao.pdf               # [a adicionar]
+    └── apresentacao.pdf               
 ```
 
 ## Ferramentas e recursos externos
