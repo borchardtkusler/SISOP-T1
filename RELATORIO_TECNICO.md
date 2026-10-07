@@ -19,7 +19,7 @@
 | Turma | 330 |
 | Estratégia paralela | Pthreads |
 | Plataforma testada | macOS 26.3 (arm64, Apple M2) e Linux (x86_64) |
-| Commit avaliado | [`PREENCHER HASH_DO_COMMIT`] |
+| Commit avaliado | 1e27bb4 |
 
 ## Resumo
 
@@ -697,7 +697,7 @@ O código C não usa bibliotecas externas além da biblioteca padrão e de Pthre
 - [x] Os slides estão em `slides/apresentacao.pdf`.
 - [x] O link do vídeo está acessível e o vídeo tem até 10 minutos.
 - [x] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
-- [ ] O hash do commit avaliado foi registrado neste relatório.
+- [x] O hash do commit avaliado foi registrado neste relatório. 
 
 ## Apêndice A - Registro de comandos
 
