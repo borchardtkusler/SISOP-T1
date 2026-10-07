@@ -5,7 +5,7 @@
 > **Instituição:** Pontifícia Universidade Católica do Rio Grande do Sul - Escola Politécnica  
 > **Repositório:** [https://github.com/borchardtkusler/SISOP-T1](https://github.com/borchardtkusler/SISOP-T1)  
 > **Versão do relatório:** 1.0  
-> **Data:** 02/10/2026
+> **Data:** 06/10/2026
 
 ## Identificação
 
@@ -616,25 +616,25 @@ O principal aprendizado é que paralelizar exige tornar o problema decomponível
 
 | Campo | Informação |
 |---|---|
-| Plataforma | [YouTube / Vimeo] |
-| Link privado ou não listado | [INSERIR URL COMPLETA] |
-| Duração | [MM:SS - máximo de 10 minutos] |
-| Privacidade | [Não listado / privado compartilhado com o professor / protegido por senha] |
-| Senha, se aplicável | [PREENCHER ou `Não se aplica`] |
-| Data da última verificação do acesso | [DD/MM/AAAA] |
+| Plataforma | YouTube |
+| Link privado ou não listado | https://youtu.be/e17jc-374nE?is=cAjXPMiXK9a0TT8g |
+| Duração | 07:45 |
+| Privacidade | Não listado |
+| Senha, se aplicável | Não se aplica] |
+| Data da última verificação do acesso | 06/10/2026] |
 
 > **Importante:** o vídeo deve permanecer acessível ao professor durante todo o período de avaliação. Teste o link em uma janela anônima antes da entrega.
 
 ### 13.1 Conteúdo do vídeo
 
-- [ ] Problema e estratégia escolhida.
-- [ ] Implementação sequencial e referência de correção.
-- [ ] Decomposição, processos/threads e sincronização.
-- [ ] Consolidação de objetos que atravessam regiões (sugestão: demonstrar `-v` no exemplo 3).
-- [ ] Demonstração executável.
-- [ ] Testes obrigatórios e adicionais (`make testes`).
-- [ ] Resultados de desempenho.
-- [ ] Conclusões.
+- [x] Problema e estratégia escolhida.
+- [x] Implementação sequencial e referência de correção.
+- [x] Decomposição, processos/threads e sincronização.
+- [x] Consolidação de objetos que atravessam regiões (sugestão: demonstrar `-v` no exemplo 3).
+- [x] Demonstração executável.
+- [x] Testes obrigatórios e adicionais (`make testes`).
+- [x] Resultados de desempenho.
+- [x] Conclusões.
 
 ## 14. Contribuições dos integrantes
 
@@ -695,7 +695,7 @@ O código C não usa bibliotecas externas além da biblioteca padrão e de Pthre
 - [x] As matrizes de teste e seus resultados estão incluídos.
 - [x] A análise de desempenho está incluída.
 - [x] Os slides estão em `slides/apresentacao.pdf`.
-- [ ] O link do vídeo está acessível e o vídeo tem até 10 minutos.
+- [x] O link do vídeo está acessível e o vídeo tem até 10 minutos.
 - [x] Ferramentas, referências, bibliotecas e códigos externos foram identificados.
 - [ ] O hash do commit avaliado foi registrado neste relatório.
 
