@@ -620,8 +620,8 @@ O principal aprendizado é que paralelizar exige tornar o problema decomponível
 | Link privado ou não listado | https://youtu.be/e17jc-374nE?is=cAjXPMiXK9a0TT8g |
 | Duração | 07:45 |
 | Privacidade | Não listado |
-| Senha, se aplicável | Não se aplica] |
-| Data da última verificação do acesso | 06/10/2026] |
+| Senha, se aplicável | Não se aplica |
+| Data da última verificação do acesso | 06/10/2026 |
 
 > **Importante:** o vídeo deve permanecer acessível ao professor durante todo o período de avaliação. Teste o link em uma janela anônima antes da entrega.
 
